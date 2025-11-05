@@ -1,32 +1,33 @@
-import express from "express"
+// 1) Load env FIRST
+import dotenv from "dotenv";
+dotenv.config();
 
-import dotenv from "dotenv"
+import cors from "cors";
+import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoute.js";
+import messageRoutes from "./routes/messageRoutes.js";
 import { connectDB } from "./lib/db.js";
-import cookieParser from "cookie-parser"
-import messageRoutes from "./routes/messageRoutes.js"
-import cors from "cors"
 import { app, server } from "./lib/socket.js";
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// 2) Body parsers (only once)
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-
-dotenv.config();
-const PORT = process.env.PORT
-
-app.use(express.json());
-app.use(cookieParser());
+// 3) CORS (must come before routes)
 app.use(cors({
-  origin: ['https://chat-apk-zeta.vercel.app', 'http://localhost:5173'],
-  credentials: true
+  origin: ["https://chat-apk-zeta.vercel.app", "http://localhost:5173"],
+  credentials: true,
 }));
 
-app.use("/api/auth" ,authRoutes)
+app.use(cookieParser());
 
-app.use("/api/messages" ,messageRoutes)
+// 4) Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/messages", messageRoutes);
 
-server.listen(PORT , ()=>{
-    connectDB()
-console.log("server started port : "+PORT );
-})
+// 5) Start
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+  connectDB();
+  console.log("server started port : " + PORT);
+});
